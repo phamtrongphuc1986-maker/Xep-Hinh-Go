@@ -108,6 +108,8 @@
     display:flex; align-items:center; justify-content:center; font-weight:900;
   }
   .icon-btn:active { transform:translateY(3px); box-shadow:0 1px 0 #8a5a24; }
+  .icon-btn.mus-off { filter:grayscale(.85); opacity:.7; }
+  .mus-float { position:fixed; top:12px; right:12px; z-index:65; }
   .goal-box { text-align:center; flex:1; }
   .goal-item { font-size:34px; line-height:1; }
   .goal-num { font-size:21px; font-weight:900; color:#fff; text-shadow:0 2px 3px rgba(0,0,0,.45); }
@@ -240,6 +242,7 @@
 
 <!-- ============ TRANG CHỦ ============ -->
 <section id="scr-home" class="screen on">
+  <button class="icon-btn mus-btn mus-float" title="Bật/tắt nhạc nền">🔊</button>
   <div class="logo">
     <div class="letters"><span class="lg-g">B</span><span class="lg-t">L</span><span class="lg-b">O</span><span class="lg-p">C</span><span class="lg-o">K</span></div>
     <div class="big">XẾP HÌNH</div>
@@ -282,6 +285,7 @@
   <div class="game-top">
     <button class="icon-btn" id="mapBack">←</button>
     <div class="goal-box"><div class="goal-label" style="font-size:16px;">BẢN ĐỒ PHIÊU LƯU</div></div>
+    <button class="icon-btn mus-btn" title="Bật/tắt nhạc nền">🔊</button>
     <button class="icon-btn" id="mapGear">⚙️</button>
   </div>
   <div class="map-head">
@@ -301,6 +305,7 @@
   <div class="game-top">
     <button class="icon-btn" id="gameBack">←</button>
     <div class="goal-box" id="goalBox"></div>
+    <button class="icon-btn mus-btn" title="Bật/tắt nhạc nền">🔊</button>
     <button class="icon-btn" id="gameGear">⚙️</button>
   </div>
   <div class="scorebar" id="scorebar">
@@ -320,6 +325,7 @@
   <div class="game-top">
     <button class="icon-btn" id="jigBack">←</button>
     <div class="goal-box"><div class="goal-item">🧩</div><div class="goal-num">Ghép Hình</div><div class="goal-label">Chọn một bức tranh để xếp</div></div>
+    <button class="icon-btn mus-btn" title="Bật/tắt nhạc nền">🔊</button>
     <button class="icon-btn" id="jigGear">⚙️</button>
   </div>
   <div id="picList"></div>
@@ -331,6 +337,7 @@
   <div class="game-top">
     <button class="icon-btn" id="jigGameBack">←</button>
     <div class="goal-box" id="jigHud"></div>
+    <button class="icon-btn mus-btn" title="Bật/tắt nhạc nền">🔊</button>
     <button class="icon-btn" id="jigGameGear">⚙️</button>
   </div>
   <div id="jigBoardWrap"><div id="jigBoard"></div><div id="jigPraise"></div></div>
@@ -349,7 +356,8 @@
   <div class="panel">
     <div class="ribbon">⚙️ Cài đặt</div>
     <div class="modal-list">
-      <div class="row"><span>🔊 Âm thanh</span><button class="toggle" id="tgSound"></button></div>
+      <div class="row"><span>🎵 Nhạc nền</span><button class="toggle" id="tgMusic"></button></div>
+      <div class="row"><span>🔊 Hiệu ứng âm thanh</span><button class="toggle" id="tgSound"></button></div>
       <div class="row"><span>🗑️ Xóa tiến trình, chơi lại từ đầu</span><button class="btn-sub" id="btnReset">Xóa</button></div>
     </div>
     <div class="btn-row"><button class="btn-sub" id="btnCloseSettings">Đóng</button></div>
@@ -425,7 +433,7 @@ function randShapeAdv(){
 
 /* ================== LƯU TIẾN TRÌNH ================== */
 const SAVE_KEY = 'xep-hinh-go-v1';
-let save = { unlocked: 1, done: {}, best: 0, sound: true, jig: {} };
+let save = { unlocked: 1, done: {}, best: 0, sound: true, music: true, jig: {} };
 try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.unlocked) save = Object.assign(save, s); } catch(e){}
 function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e){} }
 
@@ -461,6 +469,76 @@ function sndBoom(){
     o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + 0.42);
   } catch(e){}
 }
+
+/* ================== NHẠC NỀN (tự soạn bằng WebAudio, không dùng file ngoài) ================== */
+// Vòng hợp âm C – G – Am – F, giai điệu ngũ cung vui tươi, bass nhẹ, lặp liền mạch ở 96 BPM.
+const MUS_VOL = 0.2, MUS_EIGHTH = 60 / 96 / 2;
+const MUS_BARS = [
+  { bass:[130.81,196.00], pad:[329.63,392.00], mel:[659.25,0,523.25,0,392.00,0,440.00,0] },
+  { bass:[98.00,146.83],  pad:[246.94,293.66], mel:[587.33,0,783.99,0,659.25,0,587.33,0] },
+  { bass:[110.00,164.81], pad:[261.63,329.63], mel:[659.25,0,880.00,0,783.99,0,659.25,0] },
+  { bass:[87.31,130.81],  pad:[220.00,261.63], mel:[880.00,0,783.99,0,659.25,0,523.25,0] },
+  { bass:[130.81,196.00], pad:[329.63,392.00], mel:[523.25,0,659.25,0,783.99,0,880.00,0] },
+  { bass:[98.00,146.83],  pad:[246.94,293.66], mel:[783.99,0,659.25,0,587.33,0,392.00,0] },
+  { bass:[87.31,130.81],  pad:[220.00,261.63], mel:[440.00,0,523.25,0,659.25,0,783.99,0] },
+  { bass:[98.00,146.83],  pad:[246.94,293.66], mel:[587.33,0,659.25,0,587.33,0,0,0] }
+];
+const MUS = { on:false, timer:null, step:0, nextT:0, gain:null };
+window.__music = MUS;
+function musNote(freq, t, dur, type, vol, attack){
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + (attack || 0.03));
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(MUS.gain);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function musScheduleStep(step, t){
+  const bar = MUS_BARS[Math.floor(step / 8) % MUS_BARS.length], s = step % 8;
+  if (s === 0) bar.pad.forEach(f => musNote(f, t, MUS_EIGHTH * 8, 'sine', 0.13, 0.4));
+  if (s === 0) musNote(bar.bass[0], t, MUS_EIGHTH * 3.6, 'sine', 0.5);
+  if (s === 4) musNote(bar.bass[1], t, MUS_EIGHTH * 3.6, 'sine', 0.42);
+  const m = bar.mel[s];
+  if (m) musNote(m, t, MUS_EIGHTH * 1.9, 'triangle', 0.5);
+}
+function musTick(){
+  if (!MUS.on || !AC) return;
+  while (MUS.nextT < AC.currentTime + 0.3){
+    musScheduleStep(MUS.step, MUS.nextT);
+    MUS.nextT += MUS_EIGHTH; MUS.step++;
+  }
+}
+function musicStart(){
+  if (!save.music || MUS.on) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    if (!MUS.gain){ MUS.gain = AC.createGain(); MUS.gain.gain.value = MUS_VOL; MUS.gain.connect(AC.destination); }
+    MUS.on = true; MUS.step = 0; MUS.nextT = AC.currentTime + 0.08;
+    MUS.timer = setInterval(musTick, 90);
+  } catch(e){}
+}
+function musicStop(){
+  MUS.on = false;
+  if (MUS.timer){ clearInterval(MUS.timer); MUS.timer = null; }
+}
+function syncMusicBtns(){
+  document.querySelectorAll('.mus-btn').forEach(b => { b.textContent = save.music ? '🔊' : '🔇'; b.classList.toggle('mus-off', !save.music); });
+  const tg = $('tgMusic'); if (tg) tg.classList.toggle('off', !save.music);
+}
+function musicToggle(){
+  save.music = !save.music; persist(); syncMusicBtns();
+  if (save.music) musicStart(); else musicStop();
+}
+// Trình duyệt chặn tự phát: nhạc chỉ bắt đầu sau lần chạm/bấm đầu tiên
+window.addEventListener('pointerdown', () => { if (save.music) musicStart(); });
+window.addEventListener('keydown', () => { if (save.music) musicStart(); });
+// Ẩn tab/app thì tạm dừng, quay lại thì phát tiếp (nếu đang bật)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) musicStop();
+  else if (save.music) musicStart();
+});
 
 /* ================== TIỆN ÍCH ================== */
 const $ = (id) => document.getElementById(id);
@@ -1314,18 +1392,22 @@ $('btnPlayLevel').addEventListener('click', () => { const cur = Math.min(save.un
 $('gameBack').addEventListener('click', () => { if (G && G.mode === 'adv') goMap(); else goHome(); });
 function openSettings(){
   $('tgSound').classList.toggle('off', !save.sound);
+  $('tgMusic').classList.toggle('off', !save.music);
   $('ovSettings').classList.add('on');
 }
 $('gameGear').addEventListener('click', openSettings);
 $('mapGear').addEventListener('click', openSettings);
 $('btnCloseSettings').addEventListener('click', () => $('ovSettings').classList.remove('on'));
 $('tgSound').addEventListener('click', () => { save.sound = !save.sound; persist(); $('tgSound').classList.toggle('off', !save.sound); if (save.sound) sndPlace(); });
+$('tgMusic').addEventListener('click', musicToggle);
+document.querySelectorAll('.mus-btn').forEach(b => b.addEventListener('click', musicToggle));
 $('btnReset').addEventListener('click', () => {
   if (!confirm('Xóa toàn bộ tiến trình (cấp đã qua + kỷ lục) và chơi lại từ đầu?')) return;
-  save = { unlocked: 1, done: {}, best: 0, sound: save.sound, jig: {} }; persist();
+  save = { unlocked: 1, done: {}, best: 0, sound: save.sound, music: save.music !== false, jig: {} }; persist();
   $('ovSettings').classList.remove('on'); updateHome(); renderMap(); toast('Đã xóa tiến trình');
 });
 updateHome();
+syncMusicBtns();
 </script>
 </body>
 </html>
