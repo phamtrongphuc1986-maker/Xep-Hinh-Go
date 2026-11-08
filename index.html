@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Crush Blocks — Block Puzzle</title>
+<title>Timber Block Puzzle</title>
 <meta name="description" content="Game xếp hình khối gỗ 8×8: kéo thả khối, xóa hàng cột, chinh phục 40 cấp phiêu lưu.">
 <meta name="theme-color" content="#a06a30">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Crush Blocks">
+<meta name="apple-mobile-web-app-title" content="Timber Block Puzzle">
 <link rel="apple-touch-icon" href="https://gia.hialo.vn/tai-app/icon-xep-hinh-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="https://gia.hialo.vn/tai-app/icon-xep-hinh-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="https://gia.hialo.vn/tai-app/icon-xep-hinh-512.png">
@@ -34,7 +34,7 @@
   .logo .letters { display:flex; justify-content:center; gap:4px; margin-bottom:2px; }
   .logo .letters span {
     display:inline-flex; align-items:center; justify-content:center;
-    width:44px; height:44px; border-radius:9px; font-weight:900; font-size:27px; color:#fff;
+    width:40px; height:40px; border-radius:9px; font-weight:900; font-size:25px; color:#fff;
     text-shadow:0 2px 0 rgba(0,0,0,.25); box-shadow:0 4px 0 rgba(0,0,0,.28), inset 0 -6px 0 rgba(0,0,0,.15), inset 0 3px 0 rgba(255,255,255,.35);
     transform:rotate(-4deg);
   }
@@ -42,6 +42,7 @@
   .logo .letters span:nth-child(3){ transform:rotate(-2deg); }
   .logo .letters span:nth-child(4){ transform:rotate(4deg) translateY(2px); }
   .logo .letters span:nth-child(5){ transform:rotate(-3deg) translateY(-2px); }
+  .logo .letters span:nth-child(6){ transform:rotate(2deg) translateY(2px); }
   .lg-g{background:linear-gradient(#5ec94e,#3da52e)} .lg-t{background:linear-gradient(#37b8c9,#1d97a8)}
   .lg-b{background:linear-gradient(#4a7de0,#2f5cc4)} .lg-p{background:linear-gradient(#a55eea,#8642d6)} .lg-o{background:linear-gradient(#f07840,#e05a1e)}
   .logo .big {
@@ -244,8 +245,8 @@
 <section id="scr-home" class="screen on">
   <button class="icon-btn mus-btn mus-float" title="Bật/tắt nhạc nền">🔊</button>
   <div class="logo">
-    <div class="letters"><span class="lg-g">C</span><span class="lg-t">R</span><span class="lg-b">U</span><span class="lg-p">S</span><span class="lg-o">H</span></div>
-    <div class="big">BLOCKS</div>
+    <div class="letters"><span class="lg-g">T</span><span class="lg-t">I</span><span class="lg-b">M</span><span class="lg-p">B</span><span class="lg-o">E</span><span class="lg-g">R</span></div>
+    <div class="big" style="font-size:37px">BLOCK PUZZLE</div>
     <div class="sub">Kéo thả khối gỗ · Xóa hàng, cột · Lên cấp!</div>
   </div>
 
